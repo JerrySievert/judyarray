@@ -1,3 +1,5 @@
+(copy of google code repository - https://code.google.com/p/judyarray/)
+
 # An implementation of Judy Arrays in 1250 Lines of C Code.
 A Judy array consists of a pointer to a tree of nodes. An empty tree is indicated by a NULL pointer. A Judy object is returned by judy_open, and initially contains an empty tree. Integer or string keys are added to the tree with judy_cell which returns a pointer to the mapped uint (long long in the 64 bit version) cell for each key value added. This cell must be filled with a non-zero value, usually a line number, or a count of insertions for duplicate key tracking, or a pointer to a data area to be associated with the key, prior to calling a subsequent tree operation.
 
