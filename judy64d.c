@@ -28,6 +28,7 @@
 
 #include <stdlib.h>
 #include <memory.h>
+#include <limits.h>
 
 #ifdef linux
 	#include <endian.h>
@@ -57,9 +58,9 @@ typedef unsigned int uint;
 	defined(__sparc64__) || \
 	defined(__arch64__) || \
 	defined(__powerpc64__) || \
-	defined (__s390x__) 
+	defined (__s390x__)
 	//	defines for 64 bit
-	
+
 	typedef unsigned long long judyvalue;
 	typedef unsigned long long judyslot;
 	#define JUDY_key_mask (0x07)
@@ -71,7 +72,7 @@ typedef unsigned int uint;
 
 #else
 	//	defines for 32 bit
-	
+
 	typedef uint judyvalue;
 	typedef uint judyslot;
 	#define JUDY_key_mask (0x03)
@@ -278,7 +279,7 @@ void *block;
 			return NULL;
 #endif
 		}
-	
+
 #ifdef STANDALONE
 		MaxMem += JUDY_seg;
 #endif
@@ -296,7 +297,7 @@ void judy_free (Judy *judy, void *block, int type)
 	judy->reuse[type] = (void **)block;
 	return;
 }
-		
+
 //	assemble key from current path
 
 uint judy_key (Judy *judy, uchar *buff, uint max)
@@ -398,7 +399,7 @@ uchar *base;
 			while( slot-- ) {
 				test = *(judyvalue *)(base + slot * keysize);
 #if BYTE_ORDER == BIG_ENDIAN
-				test >>= 8 * (JUDY_key_size - keysize); 
+				test >>= 8 * (JUDY_key_size - keysize);
 #else
 				test &= JudyMask[keysize];
 #endif
@@ -578,7 +579,7 @@ uchar *base;
 		node[-(newcnt - idx)] = oldnode[-(start + cnt - idx)];
 	}
 }
-			
+
 //	decompose full node to radix nodes
 
 void judy_splitnode (Judy *judy, judyslot *next, uint size, uint keysize)
@@ -738,13 +739,16 @@ uchar *base;
 			for( slot = 256; slot--; ) {
 			  judy->stack[judy->level].slot = slot;
 			  if( (inner = (judyslot *)(table[slot >> 4] & JUDY_mask)) ) {
-				if( (next = inner[slot & 0x0F]) )
-				  if( !slot )
-					return &inner[0];
-				  else
-					break;
-			  } else
-				slot &= 0xF0;
+					if( (next = inner[slot & 0x0F]) ) {
+					  if( !slot ) {
+							return &inner[0];
+					  } else {
+							break;
+						}
+					}
+			  } else {
+					slot &= 0xF0;
+				}
 			}
 			off++;
 			continue;
@@ -802,7 +806,7 @@ uint off;
 			cnt = size / (sizeof(judyslot) + keysize);
 			node = (judyslot *)((next & JUDY_mask) + size);
 			base = (uchar *)(next & JUDY_mask);
-			if( ++slot < cnt )
+			if( ++slot < cnt ) {
 #if BYTE_ORDER != BIG_ENDIAN
 				if( !base[slot * keysize] )
 #else
@@ -815,6 +819,7 @@ uint off;
 					judy->stack[judy->level].slot = slot;
 					return judy_first (judy, node[-slot-1], (off | JUDY_key_mask) + 1);
 				}
+			}
 			judy->level--;
 			continue;
 
@@ -853,7 +858,7 @@ uint off;
 
 	if( !judy->level )
 		return judy_last (judy, *judy->root, 0);
-	
+
 	while( judy->level ) {
 		next = judy->stack[judy->level].next;
 		slot = judy->stack[judy->level].slot;
@@ -892,11 +897,13 @@ uint off;
 			while( slot-- ) {
 			  judy->stack[judy->level].slot--;
 			  if( (inner = (judyslot *)(table[slot >> 4] & JUDY_mask)) )
-				if( inner[slot & 0x0F] )
-				  if( slot )
+				if( inner[slot & 0x0F] ) {
+				  if( slot ) {
 				    return judy_last(judy, inner[slot & 0x0F], off + 1);
-				  else
-					return &inner[0];
+				  } else {
+						return &inner[0];
+					}
+				}
 			}
 
 			judy->level--;
@@ -1096,7 +1103,7 @@ uchar *base;
 			while( slot-- ) {
 				test = *(judyvalue *)(base + slot * keysize);
 #if BYTE_ORDER == BIG_ENDIAN
-				test >>= 8 * (JUDY_key_size - keysize); 
+				test >>= 8 * (JUDY_key_size - keysize);
 #else
 				test &= JudyMask[keysize];
 #endif
@@ -1159,7 +1166,7 @@ uchar *base;
 			judy->level--;
 			off = start;
 			continue;
-		
+
 		case JUDY_radix:
 			table = (judyslot *)(*next & JUDY_mask); // outer radix
 
@@ -1322,9 +1329,9 @@ uint idx;
 #if 1
 	// test deletion all the way to an empty tree
 
-	if( cell = judy_prv (judy) )
+	if( (cell = judy_prv (judy)) )
 		do max -= *cell;
-		while( cell = judy_del (judy) );
+		while( (cell = judy_del (judy)) );
 
 	assert (max == 0);
 #endif
@@ -1332,4 +1339,3 @@ uint idx;
 	return 0;
 }
 #endif
-
